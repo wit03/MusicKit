@@ -1,20 +1,59 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+	import { io } from '$lib/webSocketConnection';
+
 	let loggedIn = false;
+
 	let tokenTimeout = 0;
+	let refreshToken = '';
+	let accessToken = '';
+
+	var code = $page.url.searchParams.get('code') || null;
+	var state = $page.url.searchParams.get('state') || null;
+
+	onMount(() => {
+		if (state === null) {
+			console.log('state is null');
+		} else {
+			fetch('https://accounts.spotify.com/api/token', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+					Authorization:
+						'Basic ' +
+						btoa(import.meta.env.VITE_CLIENT_ID + ':' + import.meta.env.VITE_CLIENT_SECRET)
+				},
+				body: new URLSearchParams({
+					code: code!,
+					redirect_uri: 'http://localhost:5173/player',
+					grant_type: 'authorization_code'
+				})
+			})
+				.then((res) => res.json())
+				.then((res) => {
+					loggedIn = true;
+					tokenTimeout = res.expires_in;
+					refreshToken = res.refresh_token;
+					accessToken = res.access_token;
+
+					io.emit('token', res);
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+		}
+	});
+
+	//TODO: refresh token every 1 hour
+	//TODO: manually trigger refresh token
 </script>
 
-<main class="flex justify-center items-center h-screen">
+<main class="flex justify-center items-center h-screen flex-col">
 	{#if !loggedIn}
-		<button class="btn btn-primary">Login with spotify</button>
-	{/if}
-	{#if loggedIn}
-		<h1>Logged in</h1>
-		<p>
-			The access token for playback will be expired by a certain time, we will automatically refresh
-			the token every 55 minutes.
-		</p>
-		<p>token will be valid for the next: {tokenTimeout} seconds</p>
-
-		<button class="btn btn-primary">Refresh Token</button>
+		<p>Go to /player/login to login first</p>
+	{:else}
+		<p>Logged in</p>
+		<p>Token will be valid until:</p>
 	{/if}
 </main>
