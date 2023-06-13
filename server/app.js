@@ -1,6 +1,4 @@
 import dotenv from 'dotenv';
-import express from 'express';
-import cors from 'cors';
 import fetch from 'node-fetch';
 
 import { Server } from 'socket.io';
@@ -16,10 +14,6 @@ const io = new Server(8080, {
 dotenv.config({ path: '../.env' });
 
 var access_token = '';
-
-const app = express();
-
-app.use(cors());
 
 io.on('connection', (socket) => {
 	socket.on('token', (arg) => {
@@ -38,4 +32,3 @@ io.on('connection', (socket) => {
 });
 
 console.log('Listening on 8080');
-app.listen(8080);
