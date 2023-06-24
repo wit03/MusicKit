@@ -26,7 +26,7 @@
 				},
 				body: new URLSearchParams({
 					code: code!,
-					redirect_uri: 'http://localhost:5173/player',
+					redirect_uri: 'https://musickit.vercel.app/player',
 					grant_type: 'authorization_code'
 				})
 			})
