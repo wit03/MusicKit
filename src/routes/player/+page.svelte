@@ -41,9 +41,37 @@
 				})
 				.catch((err) => {
 					console.log(err);
-				});
+ 				});
 		}
 	});
+
+	//refresh token
+	// setTimeout(() => {
+	const click = () => {
+		fetch('https://accounts.spotify.com/api/token', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				Authorization:
+					'Basic ' +
+					btoa(import.meta.env.VITE_CLIENT_ID + ':' + import.meta.env.VITE_CLIENT_SECRET)
+			},
+			body: new URLSearchParams({
+					grant_type: 'refresh_token',
+					refresh_token: refreshToken
+			})
+		}).then((res) => res.json()).then((res)=>{
+			// accessToken = res.access_token;
+			// tokenTimeout = res.expires_in;
+			// refreshToken = res.refresh_token;
+
+			// io.emit('token', res);
+			console.log(res)
+		})
+	}
+		
+	// }, tokenTimeout*1000);
+
 
 	//TODO: refresh token every 1 hour
 	//TODO: manually trigger refresh token
@@ -55,5 +83,6 @@
 	{:else}
 		<p>Logged in</p>
 		<p>Token will be valid until:</p>
+		<button on:click={click}>Refresh token</button>
 	{/if}
 </main>
